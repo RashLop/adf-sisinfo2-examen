@@ -1,0 +1,52 @@
+{
+	"name": "ds_sql_productos_bronze",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_sw_ventas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Bronze"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "prd_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_key",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_nm",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_cost",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_line",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CAT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SUBCAT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MAINTENANCE",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "BRONZE",
+			"table": "Productos"
+		}
+	}
+}
