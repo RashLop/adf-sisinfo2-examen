@@ -1,0 +1,52 @@
+{
+	"name": "ds_sql_clientes_silver",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_sw_ventas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SILVER"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "cst_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "cst_key",
+				"type": "nvarchar"
+			},
+			{
+				"name": "cst_firstname",
+				"type": "nvarchar"
+			},
+			{
+				"name": "cst_lastname",
+				"type": "nvarchar"
+			},
+			{
+				"name": "cst_marital_status",
+				"type": "char"
+			},
+			{
+				"name": "cst_gndr",
+				"type": "char"
+			},
+			{
+				"name": "BDATE",
+				"type": "date"
+			},
+			{
+				"name": "CNTRY",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "SILVER",
+			"table": "Clientes"
+		}
+	}
+}

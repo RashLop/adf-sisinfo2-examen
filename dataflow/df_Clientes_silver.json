@@ -1,0 +1,69 @@
+{
+	"name": "df_Clientes_silver",
+	"properties": {
+		"folder": {
+			"name": "SILVER"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_clientes_bronze",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "sort1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          cst_id as string,",
+				"          cst_key as string,",
+				"          cst_firstname as string,",
+				"          cst_lastname as string,",
+				"          cst_marital_status as string,",
+				"          cst_gndr as string,",
+				"          BDATE as string,",
+				"          CNTRY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 cast(output(",
+				"          BDATE as date 'yyyy-MM-dd'",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 filter(!(\r",
+				"isNull(cst_id) ||\r",
+				"isNull(cst_key) ||\r",
+				"isNull(cst_firstname) ||\r",
+				"isNull(cst_lastname) ||\r",
+				"isNull(cst_marital_status) ||\r",
+				"isNull(cst_gndr) ||\r",
+				"isNull(BDATE) ||\r",
+				"isNull(CNTRY)\r",
+				")\r",
+				") ~> filter1",
+				"filter1 aggregate(groupBy(cst_id),",
+				"     each(match(name!=\"cst_id\"), $$ = first($$))) ~> aggregate1",
+				"aggregate1 sort(asc(cst_id, true)) ~> sort1"
+			]
+		}
+	}
+}
