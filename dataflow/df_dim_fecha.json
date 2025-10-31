@@ -111,11 +111,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select4",
-				"select3 aggregate(groupBy(FECHA),",
-				"     each(match(name!=\"FECHA\"), $$ = first($$))) ~> aggregate1",
 				"select4 aggregate(groupBy(FECHA),",
+				"     each(match(name!=\"FECHA\"), $$ = first($$))) ~> aggregate1",
+				"select3 aggregate(groupBy(FECHA),",
 				"     each(match(name!=\"FECHA\"), $$ = first($$))) ~> aggregate2",
-				"aggregate2, aggregate1 union(byName: true)~> union1",
+				"aggregate1, aggregate2 union(byName: true)~> union1",
 				"union1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -129,10 +129,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          FECHA",
-				"     )) ~> sink1"
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 			]
 		}
 	}
