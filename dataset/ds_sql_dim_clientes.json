@@ -38,10 +38,6 @@
 			{
 				"name": "BDATE",
 				"type": "date"
-			},
-			{
-				"name": "GEN",
-				"type": "nvarchar"
 			}
 		],
 		"typeProperties": {
