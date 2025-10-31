@@ -1,0 +1,53 @@
+{
+	"name": "ds_sql_productos_silver",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_sw_ventas",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SILVER"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "prd_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_key",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_nm",
+				"type": "nvarchar"
+			},
+			{
+				"name": "prd_cost",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "prd_line",
+				"type": "char"
+			},
+			{
+				"name": "CAT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SUBCAT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MAINTENANCE",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "SILVER",
+			"table": "Productos"
+		}
+	}
+}
