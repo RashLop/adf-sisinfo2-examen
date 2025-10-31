@@ -1,5 +1,5 @@
 {
-	"name": "pipeline_cargarDatos",
+	"name": "pipeline_limpiar_datos",
 	"properties": {
 		"activities": [
 			{
@@ -22,7 +22,7 @@
 					"scripts": [
 						{
 							"type": "Query",
-							"text": "DELETE FROM [BRONZE].[Clientes]\r\nDELETE FROM [BRONZE].[Detalle_Ventas]\r\nDELETE FROM [BRONZE].[Productos]"
+							"text": "DELETE FROM [SILVER].[Clientes]\r\nDELETE FROM [SILVER].[Detalle_Ventas]\r\nDELETE FROM [SILVER].[Productos]"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
@@ -49,7 +49,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_Clientes_bronze",
+						"referenceName": "df_Clientes_silver",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -57,6 +57,7 @@
 						"computeType": "General"
 					},
 					"traceLevel": "Fine",
+					"runConcurrently": false,
 					"continueOnError": true
 				}
 			},
@@ -81,7 +82,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_Productos_bronze",
+						"referenceName": "df_Productos_silver",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -113,7 +114,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_Detalles_ventas",
+						"referenceName": "df_Ventas_silver",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -126,7 +127,7 @@
 			}
 		],
 		"folder": {
-			"name": "Bronze"
+			"name": "Silver"
 		},
 		"annotations": []
 	}
