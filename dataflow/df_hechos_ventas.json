@@ -63,9 +63,6 @@
 					"name": "join3"
 				},
 				{
-					"name": "derivedColumn1"
-				},
-				{
 					"name": "aggregate1"
 				},
 				{
@@ -146,8 +143,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"source1 derive(PRD_KEY = substring(PRD_KEY,7, length(PRD_KEY) - 6)) ~> derivedColumn1",
-				"derivedColumn1 aggregate(groupBy(PRD_KEY),",
+				"source1 aggregate(groupBy(PRD_KEY),",
 				"     each(match(name!=\"PRD_KEY\"), $$ = first($$))) ~> aggregate1",
 				"join3, aggregate1 join(sls_prd_key == PRD_KEY,",
 				"     joinType:'inner',",
