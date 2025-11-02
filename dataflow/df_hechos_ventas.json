@@ -1,0 +1,167 @@
+{
+	"name": "df_hechos_ventas",
+	"properties": {
+		"folder": {
+			"name": "Gold"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_ventas_silver",
+						"type": "DatasetReference"
+					},
+					"name": "ventas"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_clientes",
+						"type": "DatasetReference"
+					},
+					"name": "CLIENTES"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_fecha_gold",
+						"type": "DatasetReference"
+					},
+					"name": "FECHA"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql_dim_fecha_gold",
+						"type": "DatasetReference"
+					},
+					"name": "FECHA2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_hechos_detalle_venta",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          sls_ord_num as string,",
+				"          sls_prd_key as string,",
+				"          sls_cust_id as string,",
+				"          sls_order_dt as string,",
+				"          sls_ship_dt as string,",
+				"          sls_sales as integer,",
+				"          sls_quantity as integer,",
+				"          sls_price as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> ventas",
+				"source(output(",
+				"          CST_ID as string,",
+				"          CST_FIRSTNAME as string,",
+				"          CST_LASTNAME as string,",
+				"          CST_MARITAL_STATUS as string,",
+				"          CST_GNRD as string,",
+				"          CNTRY as string,",
+				"          BDATE as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> CLIENTES",
+				"source(output(",
+				"          ID_FECHA as integer,",
+				"          FECHA as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> FECHA",
+				"source(output(",
+				"          ID_FECHA as integer,",
+				"          FECHA as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> FECHA2",
+				"ventas, CLIENTES join(sls_cust_id == CST_ID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, FECHA join(sls_order_dt == FECHA,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2, FECHA2 join(sls_ship_dt == FECHA2@FECHA,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3 select(mapColumn(",
+				"          sls_ord_num,",
+				"          sls_prd_key,",
+				"          sls_cust_id,",
+				"          sls_quantity,",
+				"          sls_price,",
+				"          ID_ORDER_DT = FECHA@ID_FECHA,",
+				"          ID_SHIP_DT = FECHA2@ID_FECHA,",
+				"          sls_sales",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID_HECHOS as integer,",
+				"          SLS_ORD_NUM as string,",
+				"          SLS_PRD_KEY as string,",
+				"          SLS_CUST_ID as string,",
+				"          ID_ORDER_DT as integer,",
+				"          ID_SHIP_DT as integer,",
+				"          SLS_SALES as integer,",
+				"          SLS_QUANTITY as integer,",
+				"          SLS_PRICE as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SLS_ORD_NUM = sls_ord_num,",
+				"          SLS_PRD_KEY = sls_prd_key,",
+				"          SLS_CUST_ID = sls_cust_id,",
+				"          ID_ORDER_DT,",
+				"          ID_SHIP_DT,",
+				"          SLS_SALES = sls_sales,",
+				"          SLS_QUANTITY = sls_quantity,",
+				"          SLS_PRICE = sls_price",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
