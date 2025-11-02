@@ -34,17 +34,16 @@
 						"type": "DatasetReference"
 					},
 					"name": "FECHA2"
-				}
-			],
-			"sinks": [
+				},
 				{
 					"dataset": {
-						"referenceName": "ds_sql_hechos_detalle_venta",
+						"referenceName": "ds_sql_dim_productos_gold",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "source1"
 				}
 			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "join1"
@@ -56,7 +55,7 @@
 					"name": "join3"
 				},
 				{
-					"name": "select1"
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -103,6 +102,18 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> FECHA2",
+				"source(output(",
+				"          PRD_KEY as string,",
+				"          PRD_NM as string,",
+				"          PRD_COST as string,",
+				"          PRD_LINE as string,",
+				"          CAT as string,",
+				"          MAINTENANCE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
 				"ventas, CLIENTES join(sls_cust_id == CST_ID,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
@@ -118,49 +129,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3 select(mapColumn(",
-				"          sls_ord_num,",
-				"          sls_prd_key,",
-				"          sls_cust_id,",
-				"          sls_quantity,",
-				"          sls_price,",
-				"          ID_ORDER_DT = FECHA@ID_FECHA,",
-				"          ID_SHIP_DT = FECHA2@ID_FECHA,",
-				"          sls_sales",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          ID_HECHOS as integer,",
-				"          SLS_ORD_NUM as string,",
-				"          SLS_PRD_KEY as string,",
-				"          SLS_CUST_ID as string,",
-				"          ID_ORDER_DT as integer,",
-				"          ID_SHIP_DT as integer,",
-				"          SLS_SALES as integer,",
-				"          SLS_QUANTITY as integer,",
-				"          SLS_PRICE as integer",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError',",
-				"     mapColumn(",
-				"          SLS_ORD_NUM = sls_ord_num,",
-				"          SLS_PRD_KEY = sls_prd_key,",
-				"          SLS_CUST_ID = sls_cust_id,",
-				"          ID_ORDER_DT,",
-				"          ID_SHIP_DT,",
-				"          SLS_SALES = sls_sales,",
-				"          SLS_QUANTITY = sls_quantity,",
-				"          SLS_PRICE = sls_price",
-				"     )) ~> sink1"
+				"source1 derive(PRD_KEY = substring(PRD_KEY, 6, length(PRD_KEY) - 6)) ~> derivedColumn1"
 			]
 		}
 	}
