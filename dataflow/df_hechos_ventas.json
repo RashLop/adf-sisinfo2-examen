@@ -43,7 +43,15 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sql_hechos_detalle_venta",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "join1"
@@ -56,6 +64,15 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -129,7 +146,57 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"source1 derive(PRD_KEY = substring(PRD_KEY, 6, length(PRD_KEY) - 6)) ~> derivedColumn1"
+				"source1 derive(PRD_KEY = substring(PRD_KEY,7, length(PRD_KEY) - 6)) ~> derivedColumn1",
+				"derivedColumn1 aggregate(groupBy(PRD_KEY),",
+				"     each(match(name!=\"PRD_KEY\"), $$ = first($$))) ~> aggregate1",
+				"join3, aggregate1 join(sls_prd_key == PRD_KEY,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join4 select(mapColumn(",
+				"          sls_ord_num,",
+				"          sls_sales,",
+				"          sls_quantity,",
+				"          sls_price,",
+				"          CST_ID,",
+				"          ID_ORDER_DT = FECHA@ID_FECHA,",
+				"          ID_SHIP_DT = FECHA2@ID_FECHA,",
+				"          PRD_KEY",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID_HECHOS as integer,",
+				"          SLS_ORD_NUM as string,",
+				"          SLS_PRD_KEY as string,",
+				"          SLS_CUST_ID as string,",
+				"          ID_ORDER_DT as integer,",
+				"          ID_SHIP_DT as integer,",
+				"          SLS_SALES as integer,",
+				"          SLS_QUANTITY as integer,",
+				"          SLS_PRICE as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          SLS_ORD_NUM = sls_ord_num,",
+				"          SLS_PRD_KEY = PRD_KEY,",
+				"          SLS_CUST_ID = CST_ID,",
+				"          ID_ORDER_DT,",
+				"          ID_SHIP_DT,",
+				"          SLS_SALES = sls_sales,",
+				"          SLS_QUANTITY = sls_quantity,",
+				"          SLS_PRICE = sls_price",
+				"     )) ~> sink1"
 			]
 		}
 	}
