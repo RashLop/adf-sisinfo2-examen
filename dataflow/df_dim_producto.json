@@ -27,6 +27,9 @@
 			"transformations": [
 				{
 					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -54,7 +57,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 sink(allowSchemaDrift: true,",
+				"select1 aggregate(groupBy(prd_key),",
+				"     each(match(name!=\"prd_key\"), $$ = first($$))) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          PRD_KEY as string,",
